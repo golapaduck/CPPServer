@@ -8,12 +8,38 @@
 #include <asio/ts/buffer.hpp>
 #include <asio/ts/internet.hpp>
 
+std::vector<char> vBuffer(1 * 1024); // 1KB 버퍼
+
+void GrabSomeData(asio::ip::tcp::socket& socket) 
+{
+	socket.async_read_some(asio::buffer(vBuffer.data(), vBuffer.size()),
+		[&](std::error_code ec, std::size_t length)
+		{
+			if (!ec)
+			{
+				std::cout << "\n\nRead " << length << " bytes\n\n";
+
+				for (int i = 0; i < length; i++)
+					std::cout << vBuffer[i];
+
+				GrabSomeData(socket);
+			}
+
+		}
+	);
+}
+
 int main() 
 {
 	asio::error_code ec;
 
 	// context 생성
 	asio::io_context context;
+
+	//fake task
+	asio::io_context::work idleWork(context);
+
+	std::thread thrContext = std::thread([&]() {context.run();});
 
 	// 엔드포인트 생성 (make_address는 문자열 주소를 asio 포멧에 맞춰서 변경해줌)
 	asio::ip::tcp::endpoint endpoint(asio::ip::make_address("51.38.81.49", ec), 80);
@@ -31,8 +57,10 @@ int main()
 		std::cout << "Failed to connect to address: " << ec.message() << std::endl;
 	}
 
-	if (socket.is_open()) {
-		
+	if (socket.is_open()) 
+	{
+
+		GrabSomeData(socket);
 		// 소켓에 데이터를 쓰기
 		std::string sRequest =
 			"GET /index.html HTTP/1.1\r\n"
@@ -41,22 +69,12 @@ int main()
 
 		socket.write_some(asio::buffer(sRequest.data(),sRequest.size()), ec);
 
-		// read 될 때까지 대기
-		socket.wait(socket.wait_read);
+		
+		using namespace std::chrono_literals;
+		std::this_thread::sleep_for(2000ms);
 
-		// 소켓에서 데이터를 읽기
-		size_t bytes = socket.available();
-		std::cout << "Bytes available: " << bytes << std::endl;
-
-		if (bytes > 0) {
-			std::vector<char> vbuffer(bytes);
-			socket.read_some(asio::buffer(vbuffer.data(), vbuffer.size()), ec);
-
-			for (auto c : vbuffer) {
-				std::cout << c;
-			}
-		}
-
+		context.stop();
+		if (thrContext.joinable())thrContext.join();
 	}
 
 	system("pause");
