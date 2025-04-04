@@ -1,82 +1,64 @@
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <windows.h>
 #include <iostream>
 
-#pragma comment(lib, "Ws2_32.lib")
+#ifdef _WIN32
+#define _WIN32_WINNT 0x0A00
+#endif
+#define ASIO_STANDALONE
+#include <asio.hpp>
+#include <asio/ts/buffer.hpp>
+#include <asio/ts/internet.hpp>
 
-using namespace std;
+int main() 
+{
+	asio::error_code ec;
 
-int main() {
+	// context 생성
+	asio::io_context context;
 
-	//소켓 초기화
+	// 엔드포인트 생성 (make_address는 문자열 주소를 asio 포멧에 맞춰서 변경해줌)
+	asio::ip::tcp::endpoint endpoint(asio::ip::make_address("51.38.81.49", ec), 80);
 
-	WSADATA wsaData;
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-		cout << "WSAStartup failed" << endl;
-		return 0;
+	// 소켓 생성
+	asio::ip::tcp::socket socket(context);
+
+	// 소켓을 엔드포인트에 연결
+	socket.connect(endpoint, ec);
+
+	if (!ec) {
+		std::cout << "Connected!" << std::endl;
 	}
-	
-	//소켓 생성
-	SOCKET listenSocket = ::socket(AF_INET, SOCK_STREAM, 0);
-	if (listenSocket == INVALID_SOCKET) {
-		cout << "socket failed" << endl;
-		return 0;
-	}
-
-	//소켓 주소 설정
-	SOCKADDR_IN serverAddr;
-	::memset(&serverAddr, 0, sizeof(serverAddr));
-	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(9000);
-	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	if (::bind(listenSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
-		cout << "bind failed" << endl;
-		return 0;
-	}
-
-	cout << "Server Start" << endl;
-
-	//Listen
-	if (::listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
-		cout << "listen failed" << endl;
-		return 0;
+	else {
+		std::cout << "Failed to connect to address: " << ec.message() << std::endl;
 	}
 
-	//Accept
-	while (true) {
-		SOCKADDR_IN clientAddr;
-		::memset(&clientAddr, 0, sizeof(clientAddr));
-		int addrLen = sizeof(clientAddr);
-
-		SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
-		if (clientSocket == INVALID_SOCKET) {
-			cout << "accept failed" << endl;
-			return 0;
-		}
-
-		char ip[16];
-		::inet_ntop(AF_INET, &clientAddr.sin_addr, ip, sizeof(ip));
-		cout << "client Connect : " << ip << endl;
+	if (socket.is_open()) {
 		
-		while (true) {
-			char recvBuffer[1024];
-			int recvLen = ::recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
-			if (recvLen == 0) {
-				cout << "client Disconnect : " << ip << endl;
-				break;
-			}
-			else if (recvLen == SOCKET_ERROR) {
-				cout << "recv failed" << endl;
-				break;
-			}
-			cout << "recv : " << recvBuffer << endl;
-			
-			int result = ::send(clientSocket, recvBuffer, recvLen, 0);
-			if (result == SOCKET_ERROR) {
-				cout << "send failed" << endl;
-				break;
+		// 소켓에 데이터를 쓰기
+		std::string sRequest =
+			"GET /index.html HTTP/1.1\r\n"
+			"Host: example.com\r\n"
+			"Connection: close\r\n";
+
+		socket.write_some(asio::buffer(sRequest.data(),sRequest.size()), ec);
+
+		// read 될 때까지 대기
+		socket.wait(socket.wait_read);
+
+		// 소켓에서 데이터를 읽기
+		size_t bytes = socket.available();
+		std::cout << "Bytes available: " << bytes << std::endl;
+
+		if (bytes > 0) {
+			std::vector<char> vbuffer(bytes);
+			socket.read_some(asio::buffer(vbuffer.data(), vbuffer.size()), ec);
+
+			for (auto c : vbuffer) {
+				std::cout << c;
 			}
 		}
+
 	}
+
+	system("pause");
+	return 0;
 }
