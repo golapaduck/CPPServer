@@ -37,7 +37,7 @@ namespace olc
 			tsqueue<message<T>> m_qMessagesOut;
 
 			// 이 Connection에서 받을 모든 메세지가 저장되는 Queue
-			tsqueue<owned_message>& m_qMessageIn;
+			tsqueue<owned_message<T>>& m_qMessageIn;
 
 
 		};

@@ -11,9 +11,9 @@ namespace olc
 		template <typename T>
 		class client_interface
 		{
-			client_interface() : m_socket(m_context)
-			{
-			}
+		public:
+			client_interface()
+			{}
 
 			virtual ~client_interface()
 			{
@@ -32,13 +32,13 @@ namespace olc
 
 					// hostname/ip-주소 변환
 					asio::ip::tcp::resolver resolver(m_context);
-					m_endpoints = resolver.resolve(host, std::to_string(port));
+					asio::ip::tcp::resolver::results_type m_endpoints = resolver.resolve(host, std::to_string(port));
 
 
 					m_connection->ConnectToServer(m_endpoints);
 					
 					// Context Thread 시작
-					thrContext = std::thread([this]({ m_context.run(); });
+					thrContext = std::thread([this]{ m_context.run(); });
 					
 				}
 				catch (std::exception& e)
@@ -76,6 +76,13 @@ namespace olc
 					return m_connection->IsConnected();
 				else
 					return false;
+			}
+			
+			// 서버로 메세지 전송
+			void Send(const message<T>& msg)
+			{
+				if (IsConnected())
+					m_connection->Send(msg);
 			}
 
 			// 서버로부터 들어오는 메세지 Queue 검색
