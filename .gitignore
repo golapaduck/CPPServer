@@ -361,3 +361,58 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.a
+*.lib
+*.out
+*.app
+
+# Object files
+*.o
+*.obj
+*.ko
+*.elf
+
+# Precompiled Headers
+*.pch
+*.gch
+
+# IDE and editor specific files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln.docstates
+*.config
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Log files
+*.log
+logs/
+
+# User-specific files (ensure these are not committed)
+# Example: config.local.json, .env
+
+# Build directories (common names)
+build/
+bin/
+obj/
+Debug/
+Release/
+
+# Windsurf specific
+.windsurf/
+.windsurfrules
