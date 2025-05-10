@@ -4,42 +4,58 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <windows.h>
 
-//될 때까지 대기, 상호배타적 lock / 상대방이 빨리 lock을 푼다면? good / 아니면 무한대기
-//cpu 점유율이 높아짐
-class SpinLock
+mutex m;
+queue<int32> q;
+
+HANDLE handle;
+
+void Producer()
 {
-public:
-	void lock()
-	{
-		// CAS (Compare-And-Swap)
-		bool expected = false;
-		bool desired = true;
-
-		// expected일 경우, desired로 변경 (아니면 false 리턴)
-		while (_locked.compare_exchange_strong(expected, desired) == false)
+	while (true)
+	{	
 		{
-			// expected는 성공 유무와 관계없이 _locked로 반환되니 항상 false로 변경해야함
-			expected = false;
+			unique_lock<mutex> lock(m);
+			q.push(100);
 		}
 
+		::SetEvent(handle);
+
+		this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
-	
-	void unlock()
+}
+
+void Consumer()
+{
+	while (true)
 	{
-		_locked.store(false);
+		::WaitForSingleObject(handle, INFINITE);
+		//::ResetEvent(handle);
+
+		unique_lock<mutex> lock(m);
+		if (q.empty() == false)
+		{
+			int32 data = q.front();
+			q.pop();
+			cout << data << endl;
+		}
 	}
-
-private:
-	atomic<bool> _locked = false;
-};
-
-int32 sum = 0;
-mutex m;
-SpinLock spinLock;
+}
 
 int main()
 {
+	// 커널 오브젝트
+	// Usage Count
+	// Signal / Non-Signal
+	// Auto / Manual
+	handle = ::CreateEvent(NULL/*보안속성*/, FALSE/*bManualReset*/, FALSE/*binitialState*/, NULL);
 
+	thread t1(Producer);
+	thread t2(Consumer);
 
+	t1.join();
+	t2.join();
+
+	::CloseHandle(handle);
 }
