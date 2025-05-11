@@ -416,3 +416,8 @@ Release/
 # Windsurf specific
 .windsurf/
 .windsurfrules
+
+# Node.js
+node_modules/
+package-lock.json
+package.json
