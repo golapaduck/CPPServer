@@ -13,3 +13,4 @@
 - [C++ SpinLock과 Cas](doc/learning/C++%20스핀락(SpinLock)%20구현과%20CAS.md)
 - [Windows Event와 SpinLock 개선 및 생산자-소비자 패턴](doc/learning/Windows%20Event와%20SpinLock%20개선%20및%20생산자-소비자%20패턴.md)
 - [C++11 동시성 - future, promise, packaged_task](doc/learning/C++11%20동시성%20-%20future,%20promise,%20packaged_task.md)
+- [스레드 매니저와 TLS](doc/learning/스레드%20매니저와%20TLS.md)
