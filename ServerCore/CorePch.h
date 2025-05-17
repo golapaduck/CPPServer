@@ -2,18 +2,9 @@
 
 #include "Types.h"
 #include "CoreMacro.h"
-#include "CoreGlobal.h"
 #include "CoreTLS.h"
-
-#include <vector>
-#include <map>
-#include <list>
-#include <queue>
-#include <set>
-#include <stack>
-#include <chrono>
-#include <unordered_map>
-#include <unordered_set>
+#include "CoreGlobal.h"
+#include "Container.h"
 
 #include <windows.h>
 #include <iostream>

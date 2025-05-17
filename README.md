@@ -15,3 +15,4 @@
 - [C++11 동시성 - future, promise, packaged_task](doc/learning/C++11%20동시성%20-%20future,%20promise,%20packaged_task.md)
 - [스레드 매니저와 TLS](doc/learning/스레드%20매니저와%20TLS.md)
 - [데드락 감지 및 방지](doc/learning/데드락%20감지%20및%20방지.md)
+- [메모리 관리와 스마트 포인터](doc/learning/메모리%20관리와%20스마트%20포인터.md)

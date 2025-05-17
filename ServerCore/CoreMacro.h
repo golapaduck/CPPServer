@@ -15,6 +15,18 @@
 #define WRITE_LCOK				WRITE_LOCK_IDX(0)
 
 /*==================
+		Memory
+====================*/
+
+#ifdef _DEBUG
+#define xalloc(size)		StompAllocator::Alloc(size)
+#define xrelease(ptr)		StompAllocator::Release(ptr)
+#else
+
+#endif
+
+
+/*==================
 		Crash
 ====================*/
 
