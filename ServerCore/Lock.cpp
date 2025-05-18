@@ -56,6 +56,14 @@ void Lock::ReadLock(const char* name)
 #if _DEBUG
 	GDeadLockProfiler->PushLock(name);
 #endif
+	const uint32 lockThreadId = (_lockFlag.load() & WRITE_THREAD_MASK) >> 16;
+	if (LThreadId == lockThreadId)
+	{
+		_lockFlag.fetch_add(1);
+		return;
+	}
+
+
 	const int64 beginTick = ::GetTickCount64();
 	while (true)
 	{

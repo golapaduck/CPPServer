@@ -32,7 +32,7 @@ protected:
 ====================*/
 
 template<typename T>
-class SharedPtr
+class TSharedPtr
 {
 public:
 	TSharedPtr() {	}
