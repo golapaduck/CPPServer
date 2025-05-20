@@ -21,3 +21,4 @@
 - [C++ 메모리 관리 시스템 및 할당자](doc/learning/C++%20메모리%20관리%20시스템%20및%20할당자.md)
 - [논블로킹 소켓 프로그래밍 (Winsock)](doc/learning/논블로킹%20소켓%20프로그래밍.md)
 - [Winsock select 모델과 세션 관리](doc/learning/Winsock%20select%20모델과%20세션%20관리.md)
+- [Winsock WSAEventSelect 모델과 네트워크 이벤트 처리](doc/learning/Winsock%20WSAEventSelect%20모델과%20네트워크%20이벤트%20처리.md)
