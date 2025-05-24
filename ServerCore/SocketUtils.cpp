@@ -17,8 +17,8 @@ void SocketUtils::Init()
 	/* 런타임에 주소 얻어오는 API */
 	SOCKET dummySocket = CreateSocket();
 	ASSERT_CRASH(BindWindowsFunction(dummySocket, WSAID_CONNECTEX, reinterpret_cast<LPVOID*>(&ConnectEx)));
-	ASSERT_CRASH(BindWindowsFunction(dummySocket, WSAID_DISCONNECTEX, reinterpret_cast<LPVOID*>(&ConnectEx)));
-	ASSERT_CRASH(BindWindowsFunction(dummySocket, WSAID_ACCEPTEX, reinterpret_cast<LPVOID*>(&ConnectEx)));
+	ASSERT_CRASH(BindWindowsFunction(dummySocket, WSAID_DISCONNECTEX, reinterpret_cast<LPVOID*>(&DisconnectEx)));
+	ASSERT_CRASH(BindWindowsFunction(dummySocket, WSAID_ACCEPTEX, reinterpret_cast<LPVOID*>(&AcceptEx)));
 	Close(dummySocket);
 }
 
@@ -83,7 +83,8 @@ bool SocketUtils::BindAnyAddress(SOCKET socket, uint16 port)
 {
 	SOCKADDR_IN myAddress;
 	myAddress.sin_family = AF_INET;
-	myAddress.sin_addr.s_addr = ::htons(port);
+	myAddress.sin_addr.s_addr = ::htonl(INADDR_ANY);
+	myAddress.sin_port = ::htons(port);
 
 	return SOCKET_ERROR !=	::bind(socket, reinterpret_cast<const SOCKADDR*>(&myAddress), sizeof(myAddress)); 
 }
