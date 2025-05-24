@@ -24,5 +24,6 @@
 - [Winsock WSAEventSelect 모델과 네트워크 이벤트 처리](doc/learning/Winsock%20WSAEventSelect%20모델과%20네트워크%20이벤트%20처리.md)
 - [네트워크 주소 및 소켓 유틸리티](doc/learning/네트워크%20주소%20및%20소켓%20유틸리티.md)
 - [IOCP 모델과 비동기 입출력 처리](doc/learning/IOCP%20모델과%20비동기%20입출력%20처리.md)
+- [네트워크 서비스 추상화 (Service 클래스)](doc/learning/네트워크%20서비스%20추상화%20(Service%20클래스).md)
 
 ## 기술 스택 (Tech Stack)

@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DummyClient", "DummyClient\DummyClient.vcxproj", "{66272C90-2069-44E4-94C4-BC66DD076D20}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameServer", "GameServer\GameServer.vcxproj", "{7C045208-8F00-497F-8EBE-D044E2796F3F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5CD4A130-AA39-4CB9-AFE9-2DF3A8ABB3BC} = {5CD4A130-AA39-4CB9-AFE9-2DF3A8ABB3BC}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerCore", "ServerCore\ServerCore.vcxproj", "{5CD4A130-AA39-4CB9-AFE9-2DF3A8ABB3BC}"
 EndProject

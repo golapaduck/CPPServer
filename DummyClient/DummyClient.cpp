@@ -1,103 +1,69 @@
 ﻿#include "pch.h"
-#include <iostream>
+#include "ThreadManager.h"
+#include "Service.h"
+#include "Session.h"
 
-#include <winsock2.h>
-#include <mswsock.h>
-#include <ws2tcpip.h>
-#pragma comment(lib, "ws2_32.lib")
+char sendBuffer[] = "Hello World";
 
-void HandleError(const char* cause)
+class ServerSession : public Session
 {
-	int32 errCode = ::WSAGetLastError();
-	cout << cause << " ErrorCode : " << errCode << endl;
-}
+public:
+	~ServerSession()
+	{
+		cout << "~ServerSession" << endl;
+ 	}
+
+	virtual void OnConnected() override
+	{
+		cout << "Connected To Server" << endl;
+		Send((BYTE*)sendBuffer, sizeof(sendBuffer));
+
+	}
+	virtual int32 OnRecv(BYTE* buffer, int32 len) override
+	{
+		cout << "OnRecv Len = " << len << endl;
+
+		this_thread::sleep_for(1s);
+
+		Send((BYTE*)sendBuffer, sizeof(sendBuffer));
+		return len;
+	}
+	virtual void OnSend(int32 len) override
+	{
+		cout << "OnSend Len = " << len << endl;
+	}
+
+	virtual void OnDisconnected() override
+	{
+		cout << "Disconnected" << endl;
+	}
+};
 
 int main()
 {
 	this_thread::sleep_for(1s);
 
-	WSAData wsaData;
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-		return 0;
+	ClientServiceRef service = MakeShared<ClientService>(
+		NetAddress(L"127.0.0.1", 7777),
+		MakeShared<IocpCore>(),
+		MakeShared<ServerSession>, // TODO: SessionManager 등
+		1);
 
-	SOCKET clientSocket = ::socket(AF_INET, SOCK_STREAM, 0);
-	if (clientSocket == INVALID_SOCKET)
-		return 0;
+	ASSERT_CRASH(service->Start());
 
-	u_long on = 1;
-	if (::ioctlsocket(clientSocket, FIONBIO, &on) == INVALID_SOCKET)
-		return 0;
-
-	SOCKADDR_IN serverAddr;
-	::memset(&serverAddr, 0, sizeof(serverAddr));
-	serverAddr.sin_family = AF_INET;
-	::inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
-	serverAddr.sin_port = ::htons(7777);
-
-	// Connect
-	while (true)
+	for (int32 i = 0; i < 2; i++)
 	{
-		if (::connect(clientSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
-		{
-			// 원래 블록했어야 했는데... 너가 논블로킹으로 하라며?
-			if (::WSAGetLastError() == WSAEWOULDBLOCK)
-				continue;
-			// 이미 연결된 상태라면 break
-			if (::WSAGetLastError() == WSAEISCONN)
-				break;
-			// Error
-			break;
-		}
+		GThreadManager->Launch([=]()
+			{
+				while (true)
+				{
+					service->GetIocpCore()->Dispatch();
+				}
+			});
 	}
 
-	cout << "Connected to Server!" << endl;
+	cout << "Client Start!" << endl;
 
-	char sendBuffer[100] = "Hello World";
+	GThreadManager->Join();
 
-	// Send
-	while (true)
-	{
-		if (::send(clientSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
-		{
-			// 원래 블록했어야 했는데... 너가 논블로킹으로 하라며?
-			if (::WSAGetLastError() == WSAEWOULDBLOCK)
-				continue;
-			// Error
-			break;
-		}
-
-		cout << "Send Data ! Len = " << sizeof(sendBuffer) << endl;
-
-		// Recv
-		while (true)
-		{
-			char recvBuffer[1000];
-			int32 recvLen = ::recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
-			if (recvLen == SOCKET_ERROR)
-			{
-				// 원래 블록했어야 했는데... 너가 논블로킹으로 하라며?
-				if (::WSAGetLastError() == WSAEWOULDBLOCK)
-					continue;
-
-				// Error
-				break;
-			}
-			else if (recvLen == 0)
-			{
-				// 연결 끊김
-				break;
-			}
-
-			cout << "Recv Data Len = " << recvLen << endl;
-			break;
-		}
-
-		this_thread::sleep_for(1s);
-	}
-
-	// 소켓 리소스 반환
-	::closesocket(clientSocket);
-
-	// 윈속 종료
-	::WSACleanup();
 }
