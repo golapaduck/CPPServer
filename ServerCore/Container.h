@@ -2,6 +2,7 @@
 
 #include "Types.h"
 #include "Allocator.h"
+#include <array>
 #include <vector>
 #include <map>
 #include <list>
@@ -12,6 +13,9 @@
 #include <unordered_map>
 #include <unordered_set>
 using namespace std;
+
+template<typename Type, uint32 Size>
+using Array = array<Type, Size>;
 
 template<typename Type>
 using Vector = vector<Type, StlAllocator<Type>>;
