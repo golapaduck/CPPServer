@@ -24,6 +24,4 @@ void GameSessionManager::Broadcast(SendBufferRef sendBuffer)
 	{
 		session->Send(sendBuffer);
 	}
-
-
 }
