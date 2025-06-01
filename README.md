@@ -27,5 +27,6 @@
 - [네트워크 서비스 추상화 (Service 클래스)](doc/learning/네트워크%20서비스%20추상화%20(Service%20클래스).md)
 - [네트워크 통신을 위한 송수신 버퍼 구현 (RecvBuffer, SendBuffer)](doc/learning/네트워크%20통신을%20위한%20송수신%20버퍼%20구현%20(RecvBuffer,%20SendBuffer).md)
 - [스레드 로컬 SendBuffer 최적화](doc/learning/스레드%20로컬%20SendBuffer%20최적화.md)
+- [프로토콜 버퍼 기반 패킷 처리 시스템](doc/learning/프로토콜%20버퍼%20기반%20패킷%20처리%20시스템.md)
 
 ## 기술 스택 (Tech Stack)

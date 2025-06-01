@@ -1,14 +1,14 @@
 #pragma once
 
-/*==================
-	RefCountable
-====================*/
+/*---------------
+   RefCountable
+----------------*/
 
 class RefCountable
 {
 public:
-	RefCountable() : _refCount(1){ }
-	virtual ~RefCountable(){ }
+	RefCountable() : _refCount(1) { }
+	virtual ~RefCountable() { }
 
 	int32 GetRefCount() { return _refCount; }
 
@@ -27,28 +27,29 @@ protected:
 	atomic<int32> _refCount;
 };
 
-/*==================
-	SharedPtr
-====================*/
+/*---------------
+   SharedPtr
+----------------*/
 
 template<typename T>
 class TSharedPtr
 {
 public:
-	TSharedPtr() {	}
+	TSharedPtr() { }
 	TSharedPtr(T* ptr) { Set(ptr); }
 
+	// 복사
 	TSharedPtr(const TSharedPtr& rhs) { Set(rhs._ptr); }
-
+	// 이동
 	TSharedPtr(TSharedPtr&& rhs) { _ptr = rhs._ptr; rhs._ptr = nullptr; }
-
+	// 상속 관계 복사
 	template<typename U>
-	TSharedPtr(const TSharedPtr<U>& rhs) { Set(static_cast<T*>(rhs.ptr)); }
+	TSharedPtr(const TSharedPtr<U>& rhs) { Set(static_cast<T*>(rhs._ptr)); }
 
 	~TSharedPtr() { Release(); }
 
 public:
-
+	// 복사 연산자
 	TSharedPtr& operator=(const TSharedPtr& rhs)
 	{
 		if (_ptr != rhs._ptr)
@@ -59,6 +60,7 @@ public:
 		return *this;
 	}
 
+	// 이동 연산자
 	TSharedPtr& operator=(TSharedPtr&& rhs)
 	{
 		Release();
@@ -78,8 +80,7 @@ public:
 	T*			operator->() { return _ptr; }
 	const T*	operator->() const { return _ptr; }
 
-
-	bool isNull() { return _ptr == nullptr; }
+	bool IsNull() { return _ptr == nullptr; }
 
 private:
 	inline void Set(T* ptr)
@@ -95,11 +96,9 @@ private:
 		{
 			_ptr->ReleaseRef();
 			_ptr = nullptr;
-
 		}
 	}
 
 private:
 	T* _ptr = nullptr;
 };
-

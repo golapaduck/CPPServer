@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "ThreadManager.h"
+#include "CoreTLS.h"
+#include "CoreGlobal.h"
 
-/*-------------------
+/*------------------
 	ThreadManager
 -------------------*/
 
@@ -9,7 +11,6 @@ ThreadManager::ThreadManager()
 {
 	// Main Thread
 	InitTLS();
-
 }
 
 ThreadManager::~ThreadManager()
@@ -33,7 +34,7 @@ void ThreadManager::Join()
 {
 	for (thread& t : _threads)
 	{
-		if(t.joinable())
+		if (t.joinable())
 			t.join();
 	}
 	_threads.clear();
@@ -47,4 +48,5 @@ void ThreadManager::InitTLS()
 
 void ThreadManager::DestroyTLS()
 {
+
 }

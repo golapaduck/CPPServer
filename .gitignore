@@ -421,3 +421,6 @@ Release/
 node_modules/
 package-lock.json
 package.json
+
+Libraries/
+protoc-3.17.1-win64/

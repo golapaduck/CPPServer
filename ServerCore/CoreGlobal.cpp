@@ -23,6 +23,7 @@ public:
 		GDeadLockProfiler = new DeadLockProfiler();
 		SocketUtils::Init();
 	}
+
 	~CoreGlobal()
 	{
 		delete GThreadManager;

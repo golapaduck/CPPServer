@@ -2,6 +2,9 @@
 #include "ThreadManager.h"
 #include "Service.h"
 #include "Session.h"
+#include "BufferReader.h"
+#include "ClientPacketHandler.h"
+#include <chrono>
 
 char sendData[] = "Hello World";
 
@@ -11,25 +14,18 @@ public:
 	~ServerSession()
 	{
 		cout << "~ServerSession" << endl;
- 	}
+	}
 
 	virtual void OnConnected() override
 	{
 		//cout << "Connected To Server" << endl;
-
-
 	}
-	virtual int32 OnRecvPacket(BYTE* buffer, int32 len) override
+
+	virtual void OnRecvPacket(BYTE* buffer, int32 len) override
 	{
-		PacketHeader header = *((PacketHeader*)buffer);
-		//cout << "Packet ID : " << header.id << "Size : " << header.size << endl;
-
-		char recvBuffer[4096];
-		::memcpy(recvBuffer, &buffer[4], header.size - sizeof(PacketHeader));
-		cout << recvBuffer << endl;
-
-		return len;
+		ClientPacketHandler::HandlePacket(buffer, len);
 	}
+
 	virtual void OnSend(int32 len) override
 	{
 		//cout << "OnSend Len = " << len << endl;
@@ -48,7 +44,7 @@ int main()
 	ClientServiceRef service = MakeShared<ClientService>(
 		NetAddress(L"127.0.0.1", 7777),
 		MakeShared<IocpCore>(),
-		MakeShared<ServerSession>, // TODO: SessionManager 등
+		MakeShared<ServerSession>, // TODO : SessionManager 등
 		1);
 
 	ASSERT_CRASH(service->Start());
@@ -64,8 +60,5 @@ int main()
 			});
 	}
 
-	cout << "Client Start!" << endl;
-
 	GThreadManager->Join();
-
 }

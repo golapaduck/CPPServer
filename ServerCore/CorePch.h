@@ -16,8 +16,8 @@ using namespace std;
 #pragma comment(lib, "ws2_32.lib")
 
 #include "Lock.h"
-
 #include "ObjectPool.h"
 #include "TypeCast.h"
 #include "Memory.h"
 #include "SendBuffer.h"
+#include "Session.h"

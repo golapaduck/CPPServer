@@ -14,7 +14,6 @@ void GameSessionManager::Remove(GameSessionRef session)
 {
 	WRITE_LOCK;
 	_sessions.erase(session);
-
 }
 
 void GameSessionManager::Broadcast(SendBufferRef sendBuffer)

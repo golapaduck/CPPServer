@@ -3,7 +3,7 @@
 #include <thread>
 #include <functional>
 
-/*-------------------
+/*------------------
 	ThreadManager
 -------------------*/
 
@@ -16,12 +16,11 @@ public:
 	void	Launch(function<void(void)> callback);
 	void	Join();
 
-	static void	InitTLS();
-	static void	DestroyTLS();
+	static void InitTLS();
+	static void DestroyTLS();
 
 private:
 	Mutex			_lock;
 	vector<thread>	_threads;
-
 };
 

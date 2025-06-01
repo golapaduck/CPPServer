@@ -5,9 +5,9 @@
 #include "Session.h"
 #include "Service.h"
 
-/*=================
+/*--------------
 	Listener
-=================*/
+---------------*/
 
 Listener::~Listener()
 {
@@ -15,7 +15,8 @@ Listener::~Listener()
 
 	for (AcceptEvent* acceptEvent : _acceptEvents)
 	{
-		//TODO
+		// TODO
+
 		xdelete(acceptEvent);
 	}
 }
@@ -36,7 +37,7 @@ bool Listener::StartAccept(ServerServiceRef service)
 	if (SocketUtils::SetReuseAddress(_socket, true) == false)
 		return false;
 
-	if (SocketUtils::SetLinger(_socket, 0,0) == false)
+	if (SocketUtils::SetLinger(_socket, 0, 0) == false)
 		return false;
 
 	if (SocketUtils::Bind(_socket, _service->GetNetAddress()) == false)
@@ -46,7 +47,7 @@ bool Listener::StartAccept(ServerServiceRef service)
 		return false;
 
 	const int32 acceptCount = _service->GetMaxSessionCount();
-	for (int32 i = 0; i < acceptCount; i++) 
+	for (int32 i = 0; i < acceptCount; i++)
 	{
 		AcceptEvent* acceptEvent = xnew<AcceptEvent>();
 		acceptEvent->owner = shared_from_this();
@@ -76,7 +77,7 @@ void Listener::Dispatch(IocpEvent* iocpEvent, int32 numOfBytes)
 
 void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
-	SessionRef session = _service->CreateSession();
+	SessionRef session = _service->CreateSession(); // Register IOCP
 
 	acceptEvent->Init();
 	acceptEvent->session = session;
@@ -87,6 +88,7 @@ void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 		const int32 errorCode = ::WSAGetLastError();
 		if (errorCode != WSA_IO_PENDING)
 		{
+			// 일단 다시 Accept 걸어준다
 			RegisterAccept(acceptEvent);
 		}
 	}
@@ -112,7 +114,5 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 
 	session->SetNetAddress(NetAddress(sockAddress));
 	session->ProcessConnect();
-	
-
 	RegisterAccept(acceptEvent);
 }
