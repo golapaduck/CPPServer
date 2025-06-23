@@ -1,61 +1,64 @@
 ﻿#include "pch.h"
-#include <iostream>
-#include "CorePch.h"
-#include <thread>
-#include <atomic>
-#include <mutex>
-#include <windows.h>
+#include "ThreadManager.h"
+#include "Service.h"
+#include "Session.h"
+#include "GameSession.h"
+#include "GameSessionManager.h"
+#include "BufferWriter.h"
+#include "ClientPacketHandler.h"
+#include <tchar.h>
+#include "Protocol.pb.h"
+#include "Job.h"
+#include "Room.h"
+#include "Player.h"
 
-mutex m;
-queue<int32> q;
-
-HANDLE handle;
-
-void Producer()
+enum
 {
-	while (true)
-	{	
-		{
-			unique_lock<mutex> lock(m);
-			q.push(100);
-		}
+	WORKER_TICK = 64
+};
 
-		::SetEvent(handle);
-
-		this_thread::sleep_for(std::chrono::milliseconds(100));
-	}
-}
-
-void Consumer()
+void DoWorkerJob(ServerServiceRef& service)
 {
 	while (true)
 	{
-		::WaitForSingleObject(handle, INFINITE);
-		//::ResetEvent(handle);
+		LEndTickCount = ::GetTickCount64() + WORKER_TICK;
 
-		unique_lock<mutex> lock(m);
-		if (q.empty() == false)
-		{
-			int32 data = q.front();
-			q.pop();
-			cout << data << endl;
-		}
+		// 네트워크 입출력 처리 -> 인게임 로직까지 (패킷 핸들러에 의해)
+		service->GetIocpCore()->Dispatch(10);
+
+		// 예약된 일감 처리
+		ThreadManager::DistributeReservedJobs();
+
+		// 글로벌 큐
+		ThreadManager::DoGlobalQueueWork();
 	}
 }
 
 int main()
 {
-	// 커널 오브젝트
-	// Usage Count
-	// Signal / Non-Signal
-	// Auto / Manual
-	handle = ::CreateEvent(NULL/*보안속성*/, FALSE/*bManualReset*/, FALSE/*binitialState*/, NULL);
+	GRoom->DoTimer(1000, []{cout << "Hello 1000" << endl; });
+	GRoom->DoTimer(2000, [] {cout << "Hello 2000" << endl; });
+	GRoom->DoTimer(3000, [] {cout << "Hello 3000" << endl; });
+	ClientPacketHandler::Init();
 
-	thread t1(Producer);
-	thread t2(Consumer);
+	ServerServiceRef service = MakeShared<ServerService>(
+		NetAddress(L"127.0.0.1", 7777),
+		MakeShared<IocpCore>(),
+		MakeShared<GameSession>, // TODO : SessionManager 등
+		100);
 
-	t1.join();
-	t2.join();
+	ASSERT_CRASH(service->Start());
 
-	::CloseHandle(handle);
+	for (int32 i = 0; i < 5; i++)
+	{
+		GThreadManager->Launch([&service]()
+			{
+				DoWorkerJob(service);
+			});
+	}
+
+	// Main Thread
+	DoWorkerJob(service);
+
+	GThreadManager->Join();
 }
